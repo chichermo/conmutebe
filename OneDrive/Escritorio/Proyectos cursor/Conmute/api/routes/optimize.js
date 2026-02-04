@@ -1,5 +1,5 @@
 const { withCors } = require('../_utils/response');
-const { getSupabaseClient } = require('../_utils/supabase');
+const { getSupabaseAdminClient } = require('../_utils/supabase');
 const { calculateCo2 } = require('../_utils/co2');
 const { fetchWeather, fetchSncbStatus, fetchStibStatus } = require('../_utils/externalApis');
 const { generateRouteInsight } = require('../_utils/ai');
@@ -48,8 +48,8 @@ module.exports = withCors(async (req, res) => {
   const prompt = `Optimiza ruta de ${origin.label} a ${destination.label} en Bélgica minimizando CO2. Clima: ${weather.description}. Estado SNCB: ${sncb.message}. Estado STIB: ${stib.message}.`;
   const aiSummary = await generateRouteInsight(prompt);
 
-  const supabase = getSupabaseClient();
-  await supabase.from('routes').insert(
+  const admin = getSupabaseAdminClient();
+  await admin.from('routes').insert(
     options.map((option) => ({
       origin_label: option.origin.label,
       origin_lat: option.origin.latitude,

@@ -1,5 +1,5 @@
 const { withCors } = require('../_utils/response');
-const { getSupabaseClient } = require('../_utils/supabase');
+const { getSupabaseAdminClient } = require('../_utils/supabase');
 const { requireAuth } = require('../_utils/auth');
 
 const rewards = [
@@ -14,7 +14,7 @@ module.exports = withCors(async (req, res) => {
 
   let userId;
   try {
-    userId = requireAuth(req);
+    userId = await requireAuth(req);
   } catch (error) {
     return res.status(error.status || 401).json({ message: error.message });
   }
@@ -25,14 +25,14 @@ module.exports = withCors(async (req, res) => {
     return res.status(404).json({ message: 'Recompensa no encontrada' });
   }
 
-  const supabase = getSupabaseClient();
-  const { data: user } = await supabase.from('users').select('points').eq('id', userId).single();
+  const admin = getSupabaseAdminClient();
+  const { data: user } = await admin.from('users').select('points').eq('id', userId).single();
   if (!user || user.points < reward.pointsCost) {
     return res.status(400).json({ message: 'Puntos insuficientes' });
   }
 
   const newPoints = user.points - reward.pointsCost;
-  await supabase.from('users').update({ points: newPoints }).eq('id', userId);
+  await admin.from('users').update({ points: newPoints }).eq('id', userId);
 
   return res.json({ success: true, reward });
 });

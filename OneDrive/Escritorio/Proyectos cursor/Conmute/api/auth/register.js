@@ -1,6 +1,5 @@
 const { withCors } = require('../_utils/response');
-const { getSupabaseClient } = require('../_utils/supabase');
-const { signToken } = require('../_utils/auth');
+const { getSupabaseAdminClient, getSupabaseAnonClient } = require('../_utils/supabase');
 
 module.exports = withCors(async (req, res) => {
   if (req.method !== 'POST') {
@@ -12,8 +11,8 @@ module.exports = withCors(async (req, res) => {
     return res.status(400).json({ message: 'Datos incompletos' });
   }
 
-  const supabase = getSupabaseClient();
-  const { data: existing } = await supabase
+  const admin = getSupabaseAdminClient();
+  const { data: existing } = await admin
     .from('users')
     .select('id')
     .eq('email', email)
@@ -23,12 +22,22 @@ module.exports = withCors(async (req, res) => {
     return res.status(409).json({ message: 'Email ya registrado' });
   }
 
-  const { data, error } = await supabase
+  const anon = getSupabaseAnonClient();
+  const { data: authData, error: authError } = await anon.auth.signUp({
+    email,
+    password,
+  });
+
+  if (authError || !authData.user) {
+    return res.status(500).json({ message: 'Error registrando usuario' });
+  }
+
+  const { data: profile, error: profileError } = await admin
     .from('users')
     .insert({
+      id: authData.user.id,
       name,
       email,
-      password_hash: password,
       language: 'nl',
       region: 'flanders',
       points: 0,
@@ -37,20 +46,19 @@ module.exports = withCors(async (req, res) => {
     .select('*')
     .single();
 
-  if (error) {
-    return res.status(500).json({ message: 'Error creando usuario' });
+  if (profileError) {
+    return res.status(500).json({ message: 'Error creando perfil' });
   }
 
-  const token = signToken(data.id);
   return res.json({
-    token,
+    token: authData.session?.access_token || '',
     user: {
-      id: data.id,
-      name: data.name,
-      language: data.language,
-      region: data.region,
-      points: data.points,
-      isPremium: data.is_premium,
+      id: profile.id,
+      name: profile.name,
+      language: profile.language,
+      region: profile.region,
+      points: profile.points,
+      isPremium: profile.is_premium,
     },
   });
 });

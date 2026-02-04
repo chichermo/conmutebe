@@ -1,6 +1,5 @@
 const { withCors } = require('../_utils/response');
-const { getSupabaseClient } = require('../_utils/supabase');
-const { signToken } = require('../_utils/auth');
+const { getSupabaseAdminClient, getSupabaseAnonClient } = require('../_utils/supabase');
 
 module.exports = withCors(async (req, res) => {
   if (req.method !== 'POST') {
@@ -12,19 +11,23 @@ module.exports = withCors(async (req, res) => {
     return res.status(400).json({ message: 'Datos incompletos' });
   }
 
-  const supabase = getSupabaseClient();
-  const { data: user } = await supabase
-    .from('users')
-    .select('*')
-    .eq('email', email)
-    .eq('password_hash', password)
-    .maybeSingle();
+  const anon = getSupabaseAnonClient();
+  const { data: authData, error: authError } = await anon.auth.signInWithPassword({
+    email,
+    password,
+  });
 
-  if (!user) {
+  if (authError || !authData.user) {
     return res.status(404).json({ message: 'Usuario no encontrado' });
   }
 
-  const token = signToken(user.id);
+  const admin = getSupabaseAdminClient();
+  const { data: user } = await admin.from('users').select('*').eq('id', authData.user.id).single();
+  if (!user) {
+    return res.status(404).json({ message: 'Perfil no encontrado' });
+  }
+
+  const token = authData.session?.access_token || '';
   return res.json({
     token,
     user: {

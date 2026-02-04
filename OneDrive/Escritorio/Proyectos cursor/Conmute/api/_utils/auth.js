@@ -1,11 +1,6 @@
-const jwt = require('jsonwebtoken');
+const { getSupabaseAnonClient } = require('./supabase');
 
-const signToken = (userId) =>
-  jwt.sign({ userId }, process.env.JWT_SECRET || 'dev-secret', {
-    expiresIn: '7d',
-  });
-
-const requireAuth = (req) => {
+const requireAuth = async (req) => {
   const header = req.headers.authorization;
   if (!header) {
     const error = new Error('Token requerido');
@@ -13,14 +8,14 @@ const requireAuth = (req) => {
     throw error;
   }
   const token = header.replace('Bearer ', '');
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'dev-secret');
-    return decoded.userId;
-  } catch (error) {
+  const supabase = getSupabaseAnonClient();
+  const { data, error } = await supabase.auth.getUser(token);
+  if (error || !data?.user) {
     const authError = new Error('Token inválido');
     authError.status = 401;
     throw authError;
   }
+  return data.user.id;
 };
 
-module.exports = { signToken, requireAuth };
+module.exports = { requireAuth };

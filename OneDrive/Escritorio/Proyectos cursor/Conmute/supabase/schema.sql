@@ -1,10 +1,9 @@
 create extension if not exists "pgcrypto";
 
 create table if not exists public.users (
-  id uuid primary key default gen_random_uuid(),
+  id uuid primary key references auth.users(id) on delete cascade,
   name text not null,
   email text unique not null,
-  password_hash text not null,
   language text default 'nl',
   region text default 'flanders',
   points integer default 0,
@@ -37,3 +36,23 @@ create table if not exists public.challenges (
   target integer,
   created_at timestamp with time zone default now()
 );
+
+alter table public.users enable row level security;
+alter table public.routes enable row level security;
+alter table public.challenges enable row level security;
+
+create policy "Usuarios leen su perfil"
+  on public.users for select
+  using (auth.uid() = id);
+
+create policy "Usuarios actualizan su perfil"
+  on public.users for update
+  using (auth.uid() = id);
+
+create policy "Rutas solo lectura"
+  on public.routes for select
+  using (auth.role() = 'authenticated');
+
+create policy "Retos solo lectura"
+  on public.challenges for select
+  using (auth.role() = 'authenticated');
