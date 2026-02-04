@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EcoCommute BE Demo</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+        background: #f8fafc;
+        color: #0f172a;
+      }
+      .container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 32px 20px 64px;
+      }
+      h1 {
+        margin-bottom: 8px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 16px;
+      }
+      .card {
+        background: #fff;
+        border-radius: 14px;
+        padding: 16px;
+        box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
+      }
+      label {
+        display: block;
+        font-size: 13px;
+        margin: 10px 0 6px;
+        color: #475569;
+      }
+      input, button, textarea {
+        width: 100%;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid #e2e8f0;
+        font-size: 14px;
+        box-sizing: border-box;
+      }
+      button {
+        background: #0f766e;
+        color: #fff;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        margin-top: 12px;
+      }
+      button.secondary {
+        background: #e2e8f0;
+        color: #0f172a;
+      }
+      .row {
+        display: flex;
+        gap: 8px;
+      }
+      pre {
+        background: #0f172a;
+        color: #e2e8f0;
+        padding: 12px;
+        border-radius: 10px;
+        overflow-x: auto;
+        font-size: 12px;
+      }
+      .badge {
+        display: inline-block;
+        padding: 4px 8px;
+        background: #e0f2fe;
+        color: #0369a1;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <span class="badge">Demo API</span>
+      <h1>EcoCommute BE</h1>
+      <p>Mini demo web para probar el backend y las rutas.</p>
+
+      <div class="grid">
+        <div class="card">
+          <h3>Registro</h3>
+          <label>Nombre</label>
+          <input id="reg-name" value="Demo" />
+          <label>Email</label>
+          <input id="reg-email" value="demo@eco.be" />
+          <label>Password</label>
+          <input id="reg-pass" type="password" value="demo1234" />
+          <button id="reg-btn">Registrar</button>
+        </div>
+
+        <div class="card">
+          <h3>Login</h3>
+          <label>Email</label>
+          <input id="log-email" value="demo@eco.be" />
+          <label>Password</label>
+          <input id="log-pass" type="password" value="demo1234" />
+          <button id="log-btn">Iniciar sesión</button>
+        </div>
+
+        <div class="card">
+          <h3>Optimizar ruta</h3>
+          <label>Origen</label>
+          <input id="origin" value="Bruselas" />
+          <label>Destino</label>
+          <input id="destination" value="Gante" />
+          <button id="route-btn">Optimizar</button>
+        </div>
+
+        <div class="card">
+          <h3>Retos y recompensas</h3>
+          <button class="secondary" id="challenges-btn">Ver desafíos</button>
+          <button class="secondary" id="rewards-btn">Ver recompensas</button>
+        </div>
+      </div>
+
+      <h3>Respuesta</h3>
+      <pre id="output">{}</pre>
+    </div>
+
+    <script>
+      const output = document.getElementById("output");
+      const apiBase = "/api";
+      let token = "";
+
+      const print = (data) => {
+        output.textContent = JSON.stringify(data, null, 2);
+      };
+
+      const request = async (path, method = "GET", body) => {
+        const res = await fetch(`${apiBase}${path}`, {
+          method,
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: body ? JSON.stringify(body) : undefined,
+        });
+        const data = await res.json();
+        if (data?.token) {
+          token = data.token;
+        }
+        return data;
+      };
+
+      document.getElementById("reg-btn").onclick = async () => {
+        const data = await request("/auth/register", "POST", {
+          name: document.getElementById("reg-name").value,
+          email: document.getElementById("reg-email").value,
+          password: document.getElementById("reg-pass").value,
+        });
+        print(data);
+      };
+
+      document.getElementById("log-btn").onclick = async () => {
+        const data = await request("/auth/login", "POST", {
+          email: document.getElementById("log-email").value,
+          password: document.getElementById("log-pass").value,
+        });
+        print(data);
+      };
+
+      document.getElementById("route-btn").onclick = async () => {
+        const data = await request("/routes/optimize", "POST", {
+          origin: { label: document.getElementById("origin").value },
+          destination: { label: document.getElementById("destination").value },
+        });
+        print(data);
+      };
+
+      document.getElementById("challenges-btn").onclick = async () => {
+        const data = await request("/challenges");
+        print(data);
+      };
+
+      document.getElementById("rewards-btn").onclick = async () => {
+        const data = await request("/rewards");
+        print(data);
+      };
+    </script>
+  </body>
+</html>
