@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EcoCommute BE</title>
+    <style>
+      :root {
+        color-scheme: light;
+      }
+      body {
+        margin: 0;
+        font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+        background: #f8fafc;
+        color: #0f172a;
+      }
+      .hero {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 64px 24px;
+      }
+      .badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: #e0f2fe;
+        color: #0369a1;
+        font-size: 12px;
+        font-weight: 600;
+      }
+      h1 {
+        font-size: 40px;
+        margin: 16px 0 8px;
+      }
+      p {
+        font-size: 18px;
+        line-height: 1.6;
+        color: #334155;
+      }
+      .grid {
+        display: grid;
+        gap: 16px;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        margin-top: 32px;
+      }
+      .card {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 18px;
+        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+      }
+      .cta {
+        margin-top: 28px;
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .button {
+        padding: 12px 18px;
+        border-radius: 10px;
+        border: 0;
+        background: #0f766e;
+        color: #ffffff;
+        font-weight: 600;
+        text-decoration: none;
+      }
+      .button.secondary {
+        background: #e2e8f0;
+        color: #0f172a;
+      }
+      .footer {
+        margin-top: 48px;
+        font-size: 14px;
+        color: #64748b;
+      }
+      code {
+        background: #f1f5f9;
+        padding: 2px 6px;
+        border-radius: 6px;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="hero">
+      <span class="badge">MVP en progreso</span>
+      <h1>EcoCommute BE</h1>
+      <p>
+        Movilidad sostenible para Bélgica con rutas multimodales (bici, tren, bus,
+        coche eléctrico), IA para minimizar CO2, tiempo y costo, desafíos comunitarios
+        y AR para huellas de carbono.
+      </p>
+      <div class="grid">
+        <div class="card">
+          <strong>Rutas inteligentes</strong>
+          <p>Optimización multimodal con clima y tráfico en vivo.</p>
+        </div>
+        <div class="card">
+          <strong>Recompensas locales</strong>
+          <p>Puntos canjeables por beneficios en comercios.</p>
+        </div>
+        <div class="card">
+          <strong>AR & mapas</strong>
+          <p>Visualiza huellas de CO2 directamente en tu ruta.</p>
+        </div>
+        <div class="card">
+          <strong>Idiomas</strong>
+          <p>Neerlandés, francés y alemán con preferencias regionales.</p>
+        </div>
+      </div>
+      <div class="cta">
+        <a class="button" href="/api/health">Ver estado de API</a>
+        <a class="button secondary" href="https://conmutebe.vercel.app">
+          Actualizar demo
+        </a>
+      </div>
+      <div class="footer">
+        Backend activo en <code>/api/*</code>. App móvil en desarrollo.
+      </div>
+    </main>
+  </body>
+</html>
